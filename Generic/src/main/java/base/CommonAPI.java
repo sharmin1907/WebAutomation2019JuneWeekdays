@@ -7,6 +7,7 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testng.ITestContext;
@@ -30,16 +31,15 @@ import java.util.concurrent.TimeUnit;
 public class CommonAPI {
     public static WebDriver driver;
     public static ExtentReports extent;
-    public  static String sauceUserName="sharmin1901";
-    public static String sauceKey="fc0dfe41-18a4-4614-b84e-dadaffb60ea8";
-    public static String browserstackUserName="";
-    public static String browserstackKey="";
+    public static String sauceUserName = "sharmin1901";
+    public static String sauceKey = "fc0dfe41-18a4-4614-b84e-dadaffb60ea8";
+    public static String browserstackUserName = "";
+    public static String browserstackKey = "";
     //http:// + username + : + key + specific url for cloud
-    public static String SAUCE_URL="http://"+sauceUserName+":"+sauceKey+"@ondemand.saucelabs.com:80/wd/hub";
-    public static String BROWSERSTACK_URL="http://"+browserstackUserName+":"+browserstackKey+"@hub-cloud.browserstack.com:80/wd/hub";
+    public static String SAUCE_URL = "http://" + sauceUserName + ":" + sauceKey + "@ondemand.saucelabs.com:80/wd/hub";
+    public static String BROWSERSTACK_URL = "http://" + browserstackUserName + ":" + browserstackKey + "@hub-cloud.browserstack.com:80/wd/hub";
 
     /**
-     *
      * @param platform
      * @param url
      * @param browser
@@ -48,14 +48,13 @@ public class CommonAPI {
      * @param envName
      * @return
      * @throws MalformedURLException
-     *
      * @parameters - values are coming from the runner.xml file of the project modules
      */
     @Parameters({"platform", "url", "browser", "cloud", "browserVersion", "envName"})
     @BeforeMethod
     public static WebDriver setupDriver(String platform, String url, String browser, Boolean cloud, String browserVersion, String envName) throws MalformedURLException {
         if (cloud) {
-            driver = getCloudDriver(browser,browserVersion,platform,envName);
+            driver = getCloudDriver(browser, browserVersion, platform, envName);
         } else {
             driver = getLocalDriver(browser, platform);
         }
@@ -64,8 +63,7 @@ public class CommonAPI {
     }
 
     /**
-     *
-     * @param browser the browser you want to execute your test cases
+     * @param browser  the browser you want to execute your test cases
      * @param platform in the operating system you want to execute your test case
      * @return webDriver object
      */
@@ -94,19 +92,19 @@ public class CommonAPI {
         return driver;
     }
 
-    public static WebDriver getCloudDriver(String browser, String browserVersion,String platform, String envName) throws MalformedURLException {
-        DesiredCapabilities desiredCapabilities=new DesiredCapabilities();
-        desiredCapabilities.setCapability("name","Cloud Execution");
-        desiredCapabilities.setCapability("browserName",browser);
-        desiredCapabilities.setCapability("browser_version",browserVersion);
-        desiredCapabilities.setCapability("os",platform);
-        desiredCapabilities.setCapability("os_version","Mojave");
-        if (envName.equalsIgnoreCase("saucelabs")){
-            desiredCapabilities.setCapability("resolution","1600x1200");
-            driver=new RemoteWebDriver(new URL(SAUCE_URL),desiredCapabilities);
-        }else if (envName.equalsIgnoreCase("browserstack")){
-            desiredCapabilities.setCapability("resolution","1024x768");
-            driver=new RemoteWebDriver(new URL(BROWSERSTACK_URL),desiredCapabilities);
+    public static WebDriver getCloudDriver(String browser, String browserVersion, String platform, String envName) throws MalformedURLException {
+        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
+        desiredCapabilities.setCapability("name", "Cloud Execution");
+        desiredCapabilities.setCapability("browserName", browser);
+        desiredCapabilities.setCapability("browser_version", browserVersion);
+        desiredCapabilities.setCapability("os", platform);
+        desiredCapabilities.setCapability("os_version", "Mojave");
+        if (envName.equalsIgnoreCase("saucelabs")) {
+            desiredCapabilities.setCapability("resolution", "1600x1200");
+            driver = new RemoteWebDriver(new URL(SAUCE_URL), desiredCapabilities);
+        } else if (envName.equalsIgnoreCase("browserstack")) {
+            desiredCapabilities.setCapability("resolution", "1024x768");
+            driver = new RemoteWebDriver(new URL(BROWSERSTACK_URL), desiredCapabilities);
         }
         return driver;
     }
@@ -206,6 +204,11 @@ public class CommonAPI {
         driver.findElement(By.id(locator)).click();
     }
 
+    public void clickOnElementByLinkText(String locator) {
+
+        driver.findElement(By.linkText(locator)).click();
+    }
+
     public void typeOnElementByXpath(String locator, String value) {
         driver.findElement(By.xpath(locator)).sendKeys(value);
     }
@@ -238,13 +241,27 @@ public class CommonAPI {
     }
 
     /**
-     *
      * @param locator - xpath that we are trying to make webElement of
      * @return webElement - webElement of the xpath
      */
     public WebElement getElement(String locator) {
-        WebElement element = driver.findElement(By.xpath(locator));
-        return element;
+        return driver.findElement(By.xpath(locator));
+    }
+
+    public WebElement getElementByLinkText(String locator) {
+        return driver.findElement(By.linkText(locator));
+    }
+
+    public void dragNdropByXpaths(String fromLocator, String toLocator) {
+        Actions actions = new Actions(driver);
+        WebElement from = getElement(fromLocator);
+        WebElement to = getElement(toLocator);
+        actions.dragAndDrop(from, to).build().perform();
+    }
+
+    public void scrollIntoView(String locator) {
+        JavascriptExecutor javascriptExecutor = (JavascriptExecutor) driver;
+        javascriptExecutor.executeScript("arguments[0].scrollIntoView(true);", getElementByLinkText(locator));
     }
 
     //classWork
@@ -261,6 +278,7 @@ public class CommonAPI {
 
         driver.findElement(By.linkText(locator));
     }
+
     public Date getTime(long millis) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(millis);
